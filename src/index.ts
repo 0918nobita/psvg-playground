@@ -1,8 +1,10 @@
-import { compilePSVG } from '@lingdong/psvg';
+import { compilePSVG, parsePSVG } from '@lingdong/psvg';
+
+import { compilePSVG2 } from './psvg2';
 
 // debugger;
 
-const svgElem = compilePSVG(`
+const src = `
     <psvg width="500" height="200">
         <for i="0" true="{i < 5}" step="1">
             <var red="{RANDOM() * 255}" />
@@ -15,8 +17,16 @@ const svgElem = compilePSVG(`
                 r="15"
                 fill="rgb({red},{green},{blue})" />
         </for>
-    </psvg>`
-);
+    </psvg>`;
+
+
+console.log(parsePSVG(src));
+
+const svgElem = compilePSVG(src);
+
+console.log({ svgElem });
+
+compilePSVG2(src);
 
 const div = document.createElement('div');
 div.innerHTML = svgElem;

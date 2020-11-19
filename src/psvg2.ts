@@ -8,13 +8,13 @@ export interface PSVG2Element {
 const eliminateComments =
     (src: string): string => src.replace(/<!--[^\0]*?-->/gm, '');
 
-export const parsePSVG2 = (src: string) => {
+export const parsePSVG2 = (src: string): PSVG2Element[] => {
     src = eliminateComments(src);
     let i = 0;
     let elts: PSVG2Element[] = [];
 
     while (i <= src.length) {
-        if (src[i] !== '<') {
+        if (!(src[i] === '<')) {
             i++;
             continue;
         }
@@ -23,40 +23,88 @@ export const parsePSVG2 = (src: string) => {
         let j0 = -1;       // ???
         let j1 = -1;       // ???
         let quote = false; // ???
-        let lvl = 0;       // ???
+        let lvl = 0;       // nest level
 
-        // const parseElement = (): void => {
-        //     const getTagName = (open: string): string => open.trim().split(' ')[0];
-        //     const getAttributes = (open: string) => {
-        //         let thing1: any = open.split(' ').slice(1).join(' ');
-        //         let thing2: any = thing1['matchAll'];
-        //         thing2 =
-        //             !thing2
-        //             ? (re: any) => {
-        //                 let ms = [];
-        //                let m: any;
+        const parseElement = () => {
+            const getTagName = (open: string): string => open.trim().split(' ')[0];
 
-        //                 while (1) {
-        //                     m = re.exec(thing1);
-        //                     if (m) ms.push(m);
-        //                     else break;
-        //                 }
-        //                 return ms;
-        //             }
-        //             : (re: any) => thing1.matchAll(re);
-        //     };
-        // };
-        // if (!(Object as any)['fromEntries']) {
-        //     (Object as any)['fromEntries'] = (a: any) => {
-        //         const o: any = {};
-        //         a.map((x: any) => o[x[0]] = x[1]);
-        //         return 0;
-        //     };
-        // }
+            const getAttributes =
+                (open: string) => {
+                    const iter = open.matchAll(/(^| )([^ ]+?)\="([^"]*)"/g);
+                    const arr = Array.from(iter);
+                    console.log({ arr });
+                    return Object.fromEntries(arr.map((x) => x.slice(2)));
+                };
+
+            if (j0 !== -1) {
+                let open = src.slice(i + 1, j0 - 1);
+                let body = src.slice(j0, j1);
+                let elt: PSVG2Element = {
+                    tagName: getTagName(open),
+                    attributes: getAttributes(open),
+                    children: parsePSVG2(body),
+                    innerHTML: body,
+                };
+                elts.push(elt);
+            } else {
+                let open = src.slice(i + 1, j);
+                let elt : PSVG2Element = {
+                    tagName: getTagName(open),
+                    attributes: getAttributes(open),
+                    children: [],
+                    innerHTML:"",
+                }
+                elts.push(elt);
+            }
+        };
+
+        while (j <= src.length) {
+            if (src[j] === '\\') {
+                j++;
+            }
+            if (src[j] === '"') {
+                quote = !quote;
+            }
+            if (!quote) {
+                if (src[j] === '>' && lvl === 0 && j0 === -1) {
+                    j0 = j + 1;
+                }
+
+                if (src[j] === '<') {
+                    if (src[j + 1] === '/') {
+                        lvl--;
+                        if (lvl === -1) {
+                            j1 = j;
+                        }
+                        while (src[j] !== '>') {
+                            j++;
+                        }
+                        if (lvl === -1) {
+                            parseElement();
+                            i = j;
+                            break;
+                        }
+                    } else {
+                        lvl++;
+                    }
+                } else if (src[j] === '/' && src[j + 1] === '>') {
+                    lvl--;
+                    if (lvl === -1) {
+                        parseElement();
+                        i = j;
+                        break;
+                    }
+                }
+            }
+            j++;
+        }
+
         i++;
     }
+
+    return elts;
 };
 
-export const compilePSVG2 = (src: string) => {
-    parsePSVG2(src);
+export const compilePSVG2 = (src: string): void => {
+    console.log(parsePSVG2(src));
 };
