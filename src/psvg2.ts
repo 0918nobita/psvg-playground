@@ -8,6 +8,16 @@ export interface PSVG2Element {
 const eliminateComments =
     (src: string): string => src.replace(/<!--[^\0]*?-->/gm, '');
 
+const getTagName =
+    (open: string): string => open.trim().split(' ')[0].trimEnd();
+
+const getAttributes =
+    (open: string) => {
+        const iter = open.matchAll(/(^| )([^ ]+?)\="([^"]*)"/g);
+        const arr = Array.from(iter);
+        return Object.fromEntries(arr.map((x) => x.slice(2)));
+    };
+
 export const parsePSVG2 = (src: string): PSVG2Element[] => {
     src = eliminateComments(src);
     let i = 0;
@@ -26,16 +36,6 @@ export const parsePSVG2 = (src: string): PSVG2Element[] => {
         let lvl = 0;       // nest level
 
         const parseElement = () => {
-            const getTagName = (open: string): string => open.trim().split(' ')[0];
-
-            const getAttributes =
-                (open: string) => {
-                    const iter = open.matchAll(/(^| )([^ ]+?)\="([^"]*)"/g);
-                    const arr = Array.from(iter);
-                    console.log({ arr });
-                    return Object.fromEntries(arr.map((x) => x.slice(2)));
-                };
-
             if (j0 !== -1) {
                 let open = src.slice(i + 1, j0 - 1);
                 let body = src.slice(j0, j1);
@@ -48,23 +48,21 @@ export const parsePSVG2 = (src: string): PSVG2Element[] => {
                 elts.push(elt);
             } else {
                 let open = src.slice(i + 1, j);
-                let elt : PSVG2Element = {
+                let elt: PSVG2Element = {
                     tagName: getTagName(open),
                     attributes: getAttributes(open),
                     children: [],
-                    innerHTML:"",
+                    innerHTML: '',
                 }
                 elts.push(elt);
             }
         };
 
         while (j <= src.length) {
-            if (src[j] === '\\') {
-                j++;
-            }
-            if (src[j] === '"') {
-                quote = !quote;
-            }
+            if (src[j] === '\\') j++;
+
+            if (src[j] === '"') quote = !quote;
+
             if (!quote) {
                 if (src[j] === '>' && lvl === 0 && j0 === -1) {
                     j0 = j + 1;
