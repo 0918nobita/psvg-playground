@@ -29,7 +29,9 @@ export const parsePSVG2 = (src: string): PSVG2Element[] => {
             continue;
         }
 
-        let j = i + 1;     // ???
+        console.log('outer', src.slice(i));
+
+        let j = i + 1;     // counter variable for inner loop
         let j0 = -1;       // ???
         let j1 = -1;       // ???
         let quote = false; // ???
@@ -64,20 +66,18 @@ export const parsePSVG2 = (src: string): PSVG2Element[] => {
             if (src[j] === '"') quote = !quote;
 
             if (!quote) {
-                if (src[j] === '>' && lvl === 0 && j0 === -1) {
-                    j0 = j + 1;
-                }
+                if (src[j] === '>' && lvl === 0 && j0 === -1) j0 = j + 1;
 
                 if (src[j] === '<') {
                     if (src[j + 1] === '/') {
                         lvl--;
+
+                        if (lvl === -1) j1 = j;
+
+                        while (src[j] !== '>') j++;
+
                         if (lvl === -1) {
-                            j1 = j;
-                        }
-                        while (src[j] !== '>') {
-                            j++;
-                        }
-                        if (lvl === -1) {
+                            // `</...>` で閉じる要素の内側のパースを開始
                             parseElement();
                             i = j;
                             break;
@@ -87,7 +87,9 @@ export const parsePSVG2 = (src: string): PSVG2Element[] => {
                     }
                 } else if (src[j] === '/' && src[j + 1] === '>') {
                     lvl--;
+
                     if (lvl === -1) {
+                        // `.../>` で閉じる要素の内側のパースを開始
                         parseElement();
                         i = j;
                         break;

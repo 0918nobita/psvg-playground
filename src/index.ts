@@ -1,4 +1,4 @@
-import { compilePSVG, parsePSVG } from '@lingdong/psvg';
+import { compilePSVG/*, parsePSVG*/ } from '@lingdong/psvg';
 
 import { compilePSVG2 } from './psvg2';
 
@@ -19,12 +19,9 @@ const src = `
         </for>
     </psvg>`;
 
-
-console.log(parsePSVG(src));
-
+// console.log(parsePSVG(src));
 const svgElem = compilePSVG(src);
-
-console.log({ svgElem });
+// console.log({ svgElem });
 
 compilePSVG2(src);
 
