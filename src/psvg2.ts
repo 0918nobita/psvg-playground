@@ -21,7 +21,7 @@ const getAttributes =
 export const parsePSVG2 = (src: string): PSVG2Element[] => {
     src = eliminateComments(src);
     let i = 0;
-    let elts: PSVG2Element[] = [];
+    const elts: PSVG2Element[] = [];
 
     while (i <= src.length) {
         if (!(src[i] === '<')) {
@@ -32,14 +32,15 @@ export const parsePSVG2 = (src: string): PSVG2Element[] => {
         let j = i + 1;     // counter variable for inner loop
         let j0 = -1;       // ???
         let j1 = -1;       // ???
-        let quote = false; // ???
+        let quote = false; // flag which represents whether it's parsing quoted string
         let lvl = 0;       // nest level
 
         const parseElement = () => {
             if (j0 !== -1) {
-                let open = src.slice(i + 1, j0 - 1);
-                let body = src.slice(j0, j1);
-                let elt: PSVG2Element = {
+                // `</...>` で閉じる要素の内側のパース
+                const open = src.slice(i + 1, j0 - 1);
+                const body = src.slice(j0, j1);
+                const elt: PSVG2Element = {
                     tagName: getTagName(open),
                     attributes: getAttributes(open),
                     children: parsePSVG2(body),
@@ -47,13 +48,14 @@ export const parsePSVG2 = (src: string): PSVG2Element[] => {
                 };
                 elts.push(elt);
             } else {
-                let open = src.slice(i + 1, j);
-                let elt: PSVG2Element = {
+                // `.../>` で閉じる要素の内側のパースを開始
+                const open = src.slice(i + 1, j);
+                const elt: PSVG2Element = {
                     tagName: getTagName(open),
                     attributes: getAttributes(open),
                     children: [],
                     innerHTML: '',
-                }
+                };
                 elts.push(elt);
             }
         };
