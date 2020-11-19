@@ -29,17 +29,17 @@ export const parsePSVG2 = (src: string): PSVG2Element[] => {
             continue;
         }
 
-        let j = i + 1;     // counter variable for inner loop
-        let j0 = -1;       // ???
-        let j1 = -1;       // ???
-        let quote = false; // flag which represents whether it's parsing quoted string
-        let lvl = 0;       // nest level
+        let j = i + 1;         // counter variable for inner loop
+        let bodyStart = -1;    // `</...>` で閉じる要素の body の先頭を指す
+        let bodyEnd = -1;      // `</...>` で閉じる要素の body の末尾を指す
+        let isQuoted = false;  // flag which represents whether it's parsing quoted string
+        let nestingLevel = 0;  // nest level
 
         const parseElement = () => {
-            if (j0 !== -1) {
+            if (bodyStart !== -1) {
                 // `</...>` で閉じる要素の内側のパース
-                const open = src.slice(i + 1, j0 - 1);
-                const body = src.slice(j0, j1);
+                const open = src.slice(i + 1, bodyStart - 1);
+                const body = src.slice(bodyStart, bodyEnd);
                 const elt: PSVG2Element = {
                     tagName: getTagName(open),
                     attributes: getAttributes(open),
@@ -63,32 +63,32 @@ export const parsePSVG2 = (src: string): PSVG2Element[] => {
         while (j <= src.length) {
             if (src[j] === '\\') j++;
 
-            if (src[j] === '"') quote = !quote;
+            if (src[j] === '"') isQuoted = !isQuoted;
 
-            if (!quote) {
-                if (src[j] === '>' && lvl === 0 && j0 === -1) j0 = j + 1;
+            if (!isQuoted) {
+                if (src[j] === '>' && nestingLevel === 0 && bodyStart === -1) bodyStart = j + 1;
 
                 if (src[j] === '<') {
                     if (src[j + 1] === '/') {
-                        lvl--;
+                        nestingLevel--;
 
-                        if (lvl === -1) j1 = j;
+                        if (nestingLevel === -1) bodyEnd = j;
 
                         while (src[j] !== '>') j++;
 
-                        if (lvl === -1) {
+                        if (nestingLevel === -1) {
                             // `</...>` で閉じる要素の内側のパースを開始
                             parseElement();
                             i = j;
                             break;
                         }
                     } else {
-                        lvl++;
+                        nestingLevel++;
                     }
                 } else if (src[j] === '/' && src[j + 1] === '>') {
-                    lvl--;
+                    nestingLevel--;
 
-                    if (lvl === -1) {
+                    if (nestingLevel === -1) {
                         // `.../>` で閉じる要素の内側のパースを開始
                         parseElement();
                         i = j;
