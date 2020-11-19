@@ -29,35 +29,33 @@ export const parsePSVG2 = (src: string): PSVG2Element[] => {
             continue;
         }
 
-        let j = i + 1;         // counter variable for inner loop
-        let bodyStart = -1;    // `</...>` で閉じる要素の body の先頭を指す
-        let bodyEnd = -1;      // `</...>` で閉じる要素の body の末尾を指す
-        let isQuoted = false;  // flag which represents whether it's parsing quoted string
-        let nestingLevel = 0;  // nest level
+        let j = i + 1;
+        let bodyStart = -1;
+        let bodyEnd = -1;
+        let isQuoted = false;
+        let nestingLevel = 0;
 
-        const parseElement = () => {
-            if (bodyStart !== -1) {
-                // `</...>` で閉じる要素の内側のパース
-                const open = src.slice(i + 1, bodyStart - 1);
-                const body = src.slice(bodyStart, bodyEnd);
-                const elt: PSVG2Element = {
-                    tagName: getTagName(open),
-                    attributes: getAttributes(open),
-                    children: parsePSVG2(body),
-                    innerHTML: body,
-                };
-                elts.push(elt);
-            } else {
-                // `.../>` で閉じる要素の内側のパースを開始
-                const open = src.slice(i + 1, j);
-                const elt: PSVG2Element = {
-                    tagName: getTagName(open),
-                    attributes: getAttributes(open),
-                    children: [],
-                    innerHTML: '',
-                };
-                elts.push(elt);
-            }
+        const parseNormalTag = (bodyStart: number, bodyEnd: number): void => {
+            const open = src.slice(i + 1, bodyStart - 1);
+            const body = src.slice(bodyStart, bodyEnd);
+            const elt: PSVG2Element = {
+                tagName: getTagName(open),
+                attributes: getAttributes(open),
+                children: parsePSVG2(body),
+                innerHTML: body,
+            };
+            elts.push(elt);
+        };
+
+        const parseSelfClosingTag = (): void => {
+            const open = src.slice(i + 1, j);
+            const elt: PSVG2Element = {
+                tagName: getTagName(open),
+                attributes: getAttributes(open),
+                children: [],
+                innerHTML: '',
+            };
+            elts.push(elt);
         };
 
         while (j <= src.length) {
@@ -77,8 +75,7 @@ export const parsePSVG2 = (src: string): PSVG2Element[] => {
                         while (src[j] !== '>') j++;
 
                         if (nestingLevel === -1) {
-                            // `</...>` で閉じる要素の内側のパースを開始
-                            parseElement();
+                            parseNormalTag(bodyStart, bodyEnd);
                             i = j;
                             break;
                         }
@@ -89,8 +86,7 @@ export const parsePSVG2 = (src: string): PSVG2Element[] => {
                     nestingLevel--;
 
                     if (nestingLevel === -1) {
-                        // `.../>` で閉じる要素の内側のパースを開始
-                        parseElement();
+                        parseSelfClosingTag();
                         i = j;
                         break;
                     }
