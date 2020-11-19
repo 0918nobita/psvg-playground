@@ -29,8 +29,6 @@ export const parsePSVG2 = (src: string): PSVG2Element[] => {
             continue;
         }
 
-        console.log('outer', src.slice(i));
-
         let j = i + 1;     // counter variable for inner loop
         let j0 = -1;       // ???
         let j1 = -1;       // ???
