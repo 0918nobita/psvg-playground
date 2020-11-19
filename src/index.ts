@@ -1,5 +1,7 @@
 import { compilePSVG } from '@lingdong/psvg';
 
+// debugger;
+
 const svgElem = compilePSVG(`
     <psvg width="500" height="200">
         <for i="0" true="{i < 5}" step="1">
