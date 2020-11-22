@@ -9,3 +9,6 @@ insert_final_newline = false
 
 [*.{html,json}]
 indent_size = 2
+
+[psvg/*]
+indent_size = 2
