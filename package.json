@@ -13,9 +13,7 @@
     "serve": "live-server dist",
     "dev": "run-p watch serve"
   },
-  "dependencies": {
-    "@lingdong/psvg": "^0.0.2"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/sane": "^2.0.0",
     "esbuild": "^0.8.11",

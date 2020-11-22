@@ -10,11 +10,6 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@lingdong/psvg@^0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@lingdong/psvg/-/psvg-0.0.2.tgz#fa3b051c30ec722addd8c5a1fed90d0795243d85"
-  integrity sha512-g44hXZlnSRvUo0JZUwNSQDSeIMmdJ4pWsjfNDrEmvRGIPUcN11jkZKfmBqLdIHcOBE+VlO7npFgzsurjrQyaxg==
-
 "@types/node@*":
   version "14.14.8"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.14.8.tgz#2127bd81949a95c8b7d3240f3254352d72563aec"
