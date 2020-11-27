@@ -5,7 +5,11 @@ export const transpilePSVG2 = (prgm: PSVG2Element[]): string => {
     const funcs: Record<string, PSVG2Func> = {};
 
     const __val = (x: string): any => {
-        if (new RegExp(/^[+-]?(\d+([.]\d*)?([eE][+-]?\d+)?|[.]\d+([eE][+-]?\d+)?)$/g).test(x))
+        if (
+            new RegExp(
+                /^[+-]?(\d+([.]\d*)?([eE][+-]?\d+)?|[.]\d+([eE][+-]?\d+)?)$/g
+            ).test(x)
+        )
             return parseFloat(x);
 
         if (x === 'true' || x === 'false') return x === 'true';
@@ -28,7 +32,13 @@ export const transpilePSVG2 = (prgm: PSVG2Element[]): string => {
     };
 
     const __tolist = (s: string): any[] =>
-        __makelist(s.replace(/,/g, ' ').split(' ').filter(x => x.length).map(__val));
+        __makelist(
+            s
+                .replace(/,/g, ' ')
+                .split(' ')
+                .filter((x) => x.length)
+                .map(__val)
+        );
 
     return Function(`"use strict"; return (${__val.toString()})('false');`)();
 };

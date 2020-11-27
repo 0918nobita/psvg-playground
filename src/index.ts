@@ -1,4 +1,5 @@
-import { compilePSVG/*, parsePSVG*/ } from '@lingdong/psvg';
+import { compilePSVG /*, parsePSVG*/ } from '@lingdong/psvg';
+import { Option, none, some } from 'fp-ts/lib/Option';
 
 import { compilePSVG2 } from './psvg2';
 
@@ -28,3 +29,17 @@ compilePSVG2(src);
 const div = document.createElement('div');
 div.innerHTML = svgElem;
 document.body.appendChild(div);
+
+const ident = (input: string): [Option<string>, string] => {
+    if (input.length === 0) return [none, input];
+
+    for (let i = 0; i < input.length; i++) {
+        const c = input[i];
+        if (!c.match(/[a-zA-Z]/))
+            return [i !== 0 ? some(input.slice(0, i)) : none, input.slice(i)];
+    }
+
+    return [some(input), ''];
+};
+
+console.log(ident('foo '));

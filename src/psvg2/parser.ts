@@ -1,17 +1,16 @@
 import { PSVG2Element } from './element';
 
-const eliminateComments =
-    (src: string): string => src.replace(/<!--[^\0]*?-->/gm, '');
+const eliminateComments = (src: string): string =>
+    src.replace(/<!--[^\0]*?-->/gm, '');
 
-const getTagName =
-    (open: string): string => open.trim().split(' ')[0].trimEnd();
+const getTagName = (open: string): string =>
+    open.trim().split(' ')[0].trimEnd();
 
-const getAttributes =
-    (open: string) => {
-        const iter = open.matchAll(/(^| )([^ ]+?)\="([^"]*)"/g);
-        const arr = Array.from(iter);
-        return Object.fromEntries(arr.map((x) => x.slice(2)));
-    };
+const getAttributes = (open: string) => {
+    const iter = open.matchAll(/(^| )([^ ]+?)\="([^"]*)"/g);
+    const arr = Array.from(iter);
+    return Object.fromEntries(arr.map((x) => x.slice(2)));
+};
 
 export const parsePSVG2 = (src: string): PSVG2Element[] => {
     src = eliminateComments(src);
@@ -59,7 +58,8 @@ export const parsePSVG2 = (src: string): PSVG2Element[] => {
             if (src[j] === '"') isQuoted = !isQuoted;
 
             if (!isQuoted) {
-                if (src[j] === '>' && nestingLevel === 0 && bodyStart === -1) bodyStart = j + 1;
+                if (src[j] === '>' && nestingLevel === 0 && bodyStart === -1)
+                    bodyStart = j + 1;
 
                 if (src[j] === '<') {
                     if (src[j + 1] === '/') {
