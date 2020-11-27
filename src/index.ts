@@ -1,5 +1,6 @@
 import { compilePSVG /*, parsePSVG*/ } from '@lingdong/psvg';
 import { Option, none, some } from 'fp-ts/lib/Option';
+import * as S from 'fp-ts/lib/State';
 import { State } from 'fp-ts/lib/State';
 
 import { compilePSVG2 } from './psvg2';
@@ -43,4 +44,4 @@ const ident: State<string, Option<string>> = (input) => {
     return [some(input), ''];
 };
 
-console.log(ident('foo '));
+console.log(S.evaluate('foo ')(ident));
